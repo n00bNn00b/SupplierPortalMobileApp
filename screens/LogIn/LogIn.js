@@ -16,11 +16,10 @@ export default function LogIn({navigation}) {
     const [loading, setloading] = useState(false)
     const [QRCodeScannerModalViewStatus, setQRCodeScannerModalViewStatus] = useState(false)
     const [isRememberMeChecked, setIsRememberMeChecked] = useState(false);
-
-    
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
 
+    
     const supabase = supabaseCreateClient
     
 
@@ -63,7 +62,7 @@ export default function LogIn({navigation}) {
           }
     }
 
-
+    // For Checking locally stored data
     useEffect(() => {
         const checkLoggedIn = async () => {
             const userData = await AsyncStorage.getItem('userData');
@@ -77,6 +76,7 @@ export default function LogIn({navigation}) {
           checkLoggedIn()
     }, [])
 
+    // For QR Code Scanner Permission
     useEffect(() => {
       const getBarCodeScannerPermissions = async () => {
         const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -181,14 +181,10 @@ export default function LogIn({navigation}) {
                 >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-
-
                       <BarCodeScanner
                         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
                         style={styles.qrCodeCamera}
                       />
-
-
                       <TouchableOpacity style={styles.cancelButton} 
                           onPress={()=>{setQRCodeScannerModalViewStatus(!QRCodeScannerModalViewStatus); 
                             
@@ -197,8 +193,7 @@ export default function LogIn({navigation}) {
                       >
                           <Text style={styles.cancelButtonText}>Cancel</Text>
                       </TouchableOpacity>
-                    </View>
-                    
+                    </View> 
                 </View>
                 
             </Modal>
