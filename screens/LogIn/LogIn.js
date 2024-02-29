@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,Modal } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Ionicons } from '@expo/vector-icons'
 import Checkbox from 'expo-checkbox'
 import { Pressable } from 'react-native'
 import 'react-native-url-polyfill/auto'
 import { supabaseCreateClient } from '../../local/Supabase'
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { Camera } from 'expo-camera';
 
 
 export default function LogIn({navigation}) {
