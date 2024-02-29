@@ -6,7 +6,8 @@ import Checkbox from 'expo-checkbox'
 import { Pressable } from 'react-native'
 import 'react-native-url-polyfill/auto'
 import { supabaseCreateClient } from '../../local/Supabase'
-
+import { BarCodeScanner } from "expo-barcode-scanner";
+import { Camera } from 'expo-camera';
 
 
 export default function LogIn({navigation}) {
@@ -15,9 +16,12 @@ export default function LogIn({navigation}) {
     const [password, setPassword] = useState('')
     const [errorMessage, seterrorMessage] = useState('')
     const [loading, setloading] = useState(false)
-    const [loggedInStatus, setloggedInStatus] = useState(false)
-    const [welcomeUserName, setwelcomeUserName] = useState('')
+    const [QRCodeScannerModalViewStatus, setQRCodeScannerModalViewStatus] = useState(false)
     const [isRememberMeChecked, setIsRememberMeChecked] = useState(false);
+
+    
+    const [hasPermission, setHasPermission] = useState(null);
+    const [scanned, setScanned] = useState(false);
 
     const supabase = supabaseCreateClient
     
@@ -73,6 +77,28 @@ export default function LogIn({navigation}) {
           };
           checkLoggedIn()
     }, [])
+
+    useEffect(() => {
+      const getBarCodeScannerPermissions = async () => {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+      };
+  
+      getBarCodeScannerPermissions();
+    }, []);
+  
+    const handleBarCodeScanned = ({ type, data }) => {
+      setScanned(true);
+      alert(data);
+    };
+  
+    if (hasPermission === null) {
+      return <Text>Requesting for camera permission</Text>;
+    }
+    if (hasPermission === false) {
+      return <Text>No access to camera</Text>;
+    }
+
     
     return (
         <ScrollView style={styles.container}>
@@ -110,25 +136,42 @@ export default function LogIn({navigation}) {
                     {loading? <ActivityIndicator size={18} color={"#fff"}/>: "Log in"}
                 </Text>
             </TouchableOpacity>
+            <View style={styles.underLogInView} >
+                <Text style={styles.ORText}>Or</Text>
+                <TouchableOpacity onPress={()=>{
+                    setQRCodeScannerModalViewStatus(!QRCodeScannerModalViewStatus)
+                    setEmail('');
+                    setPassword('');
+                    seterrorMessage('');
+                    setScanned(false);
+                    }} style={styles.QRLink}>
+                        <Text style={styles.QRLinkText}>Scan QR Code</Text>
+                    </TouchableOpacity>
+            </View>
 
             <Modal
-                visible={loggedInStatus}
+                visible={QRCodeScannerModalViewStatus}
                 animationType="fade"
                 transparent={true}
                 >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Ionicons name="md-person" size={64} color="#e80505" />
-                        <Text style={styles.welcomeText}>
-                            Welcome, <Text style={styles.usernameText}>{welcomeUserName}</Text>
-                        </Text>
-                        <TouchableOpacity style={styles.cancelButton} 
-                            onPress={()=>{setloggedInStatus(false); 
-                            navigation.replace('HomeScreen');
-                        }}
-                        >
-                            <Text style={styles.cancelButtonText}>Enter the Arena</Text>
-                        </TouchableOpacity>
+
+
+                      <BarCodeScanner
+                        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                        style={styles.qrCodeCamera}
+                      />
+
+
+                      <TouchableOpacity style={styles.cancelButton} 
+                          onPress={()=>{setQRCodeScannerModalViewStatus(!QRCodeScannerModalViewStatus); 
+                            
+                          setScanned(false);
+                      }}
+                      >
+                          <Text style={styles.cancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
                     </View>
                     
                 </View>
@@ -144,6 +187,12 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
         flex:1,
         paddingTop:30
+    },
+    container2: {
+        flex:1,
+        height:500,
+        width:600,
+        backgroundColor:'green'
     },
     title: {
         fontSize:22,
@@ -172,7 +221,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#e80505',
         marginLeft: 30,
         marginRight: 30,
-        marginTop: 20,
+        marginTop: 5,
         height: 48,
         borderRadius: 5,
         alignItems: "center",
@@ -183,22 +232,31 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold"
     },
-    footerView: {
+    underLogInView: {
         flex: 1,
         alignItems: "center",
         marginTop: 20
     },
-    footerText: {
+    ORText: {
         fontSize: 16,
-        color: '#2e2e2d'
+        color: '#2e2e2d',
+        textAlign:'center',
+        marginBottom: 10
     },
-    footerLink: {
+    QRLink: {
+        paddingVertical: 10,
+        textAlign:'center',
+        width:'40%',
+        borderWidth:2,
+        borderColor:'red',
+        borderRadius:10,
+    },
+    QRLinkText:{
+        textAlign:'center',
         color: "#e80505",
         fontWeight: "bold",
-        fontSize: 16
+        fontSize: 16,
     },
-
-
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -228,7 +286,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent:'center',
         borderRadius: 4,
-        width:'80%'
+        width:'50%'
       },
       cancelButtonText: {
         color: 'white',
@@ -243,9 +301,12 @@ const styles = StyleSheet.create({
       },
       checkbox: {
         alignSelf: 'center',
-        
       },
       checkboxLabel: {
         margin: 8,
       },
+      qrCodeCamera:{
+        height:400,
+        width:'100%'
+      }
 })
