@@ -12,7 +12,11 @@ import { FontAwesome } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
-export default function Dashboard() {
+export default function Dashboard({route,navigation}) {
+
+
+  const {email,org_type,user_name,} = route.params.userData
+
 
   const focusedIcons = [
     <Ionicons name="home-outline" size={24} color="black" />,
@@ -27,7 +31,7 @@ export default function Dashboard() {
     <FontAwesome name="user" size={24} color="#0044ba" />,
     <AntDesign name="infocirlce" size={24} color="#0044ba" /> 
   ]
-  
+
   const tabComponents = [
     {
       name:"Home",component:Home, 
@@ -50,7 +54,7 @@ export default function Dashboard() {
       {
         tabComponents.map(({name,component,focusedIcon,unFocusedIcon})=>{
           return(
-            <Tab.Screen name={name} component={component} options={{headerShown:false,tabBarIcon:({focused})=>(focused?unFocusedIcon:focusedIcon)}}/>
+            <Tab.Screen key={name} name={name} component={component} options={{headerShown:false,tabBarIcon:({focused})=>(focused?unFocusedIcon:focusedIcon)}}/>
           )
         })
       }

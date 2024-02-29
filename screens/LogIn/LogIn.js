@@ -41,6 +41,7 @@ export default function LogIn({navigation}) {
             if(isRememberMeChecked){
                 storeDataLocally(user)
             }
+            
         }
 
         setloading(false)
@@ -86,9 +87,39 @@ export default function LogIn({navigation}) {
     }, []);
   
     const handleBarCodeScanned = ({ type, data }) => {
-      setScanned(true);
-      alert(data);
+      // setScanned(true);
+      // alert(data);
+      const uuid = data.split("&userID=")[1].split("&token=")[0]
+      if(uuid.length>0) {
+        setScanned(true)
+        retriveDataFromSupabase(uuid)
+      }
     };
+
+    const retriveDataFromSupabase = async (uuid)=>{
+      console.log(uuid)
+      try{
+        
+        let {data} = await supabaseCreateClient
+        .from('user_persons_view')
+        .select('*')
+        .eq('id',uuid);
+
+        setAllToNone()
+        navigation.replace("Dashboard",{userData:data[0]})
+      }
+      catch(e){
+        console.log(e)
+      }
+    }
+
+    const setAllToNone = ()=>{
+      setQRCodeScannerModalViewStatus(!QRCodeScannerModalViewStatus)
+      setEmail('');
+      setPassword('');
+      seterrorMessage('');
+      setScanned(false);
+    }
   
     if (hasPermission === null) {
       return <Text>Requesting for camera permission</Text>;
@@ -137,11 +168,7 @@ export default function LogIn({navigation}) {
             <View style={styles.underLogInView} >
                 <Text style={styles.ORText}>Or</Text>
                 <TouchableOpacity onPress={()=>{
-                    setQRCodeScannerModalViewStatus(!QRCodeScannerModalViewStatus)
-                    setEmail('');
-                    setPassword('');
-                    seterrorMessage('');
-                    setScanned(false);
+                    setAllToNone()
                     }} style={styles.QRLink}>
                         <Text style={styles.QRLinkText}>Scan QR Code</Text>
                     </TouchableOpacity>
