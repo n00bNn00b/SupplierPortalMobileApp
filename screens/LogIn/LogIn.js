@@ -41,7 +41,7 @@ export default function LogIn({navigation}) {
             if(isRememberMeChecked){
                 storeDataLocally(user)
             }
-            
+            retriveDataFromSupabase(id)
         }
 
         setloading(false)
