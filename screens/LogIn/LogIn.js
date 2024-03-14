@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import Checkbox from 'expo-checkbox'
 import { Pressable } from 'react-native'
 import 'react-native-url-polyfill/auto'
-import { supabaseCreateClient } from '../../local/Supabase'
+import { supabaseCreateClient } from '../../Local/Superbase'
 import { BarCodeScanner } from "expo-barcode-scanner";
 
 
